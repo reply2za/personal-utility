@@ -1,5 +1,7 @@
 package com.hoursofza.personalutility.view;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.awt.Image;
 import java.awt.MenuItem;
 import java.awt.PopupMenu;
@@ -8,6 +10,7 @@ import java.awt.TrayIcon;
 
 import javax.imageio.ImageIO;
 
+@Slf4j
 public class SystemTray {
     public static java.awt.SystemTray tray = java.awt.SystemTray.getSystemTray();              // set up a system tray icon.
     public static TrayIcon trayIcon;
@@ -44,7 +47,6 @@ public class SystemTray {
             trayIconImage = ImageIO.read(SystemTray.class.getClassLoader().getResource("square.png"));
             trayIcon = new TrayIcon(trayIconImage);
             openMainMenu = new MenuItem("Open Main Menu");
-            //openItem.addActionListener(event -> Platform.runLater(this::showStage));
 
             // and select the exit option, this will shutdown JavaFX and remove the
             // tray icon (removing the tray icon will also shut down AWT).
@@ -54,7 +56,6 @@ public class SystemTray {
                 tray.remove(trayIcon);
                 System.exit(0);
             });
-
             // setup the popup menu for the application.
             popup.add(openMainMenu);
             popup.addSeparator();
@@ -63,11 +64,9 @@ public class SystemTray {
             // add the application tray icon to the system tray.
             tray.add(trayIcon);
 
-           // startRecording.addActionListener(event -> Platform.runLater(Creator::startRecording));
 
         } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println("Unable to init system tray");
+            log.error("Unable to init system tray: {}", e.getMessage());
         }
     }
 }
