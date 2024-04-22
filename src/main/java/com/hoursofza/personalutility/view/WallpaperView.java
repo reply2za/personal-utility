@@ -5,7 +5,6 @@ import java.time.Duration;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
-import java.util.Timer;
 import java.util.concurrent.*;
 import java.util.prefs.Preferences;
 
@@ -25,7 +24,6 @@ public class WallpaperView {
     private static final int ONE_MIN_MS = ONE_SECOND_MS * 60;
     private static final int ONE_HOUR_MS = ONE_MIN_MS * 60;
     private String lastChosenDir;
-    Timer timer;
     Preferences p = Preferences.userRoot();
     String directory;
     WallpaperManager wallpaperTask;
@@ -42,20 +40,21 @@ public class WallpaperView {
     private static final boolean DEBUG_LAYOUT = false;
     private static final String INIT_LAYOUT_TXT = DEBUG_LAYOUT ? "debug": "";
     private static final ScheduledExecutorService SCHEDULER = Executors.newScheduledThreadPool(1);
-    private ScheduledFuture<?> wallpaperFuture; 
+    private ScheduledFuture<?> wallpaperFuture;
+    private JCheckBox randomizeCB;
 
 
     WallpaperView(WallpaperManager wallpaperTask) {
         this.wallpaperTask = wallpaperTask;
     }
 
-    public JComponent initWallpaperCronSection() {
+    public JComponent initIntervalWallpaperSection() {
         JPanel mainPanel = new JPanel(new MigLayout(INIT_LAYOUT_TXT));
         lastChosenDir = p.get("wpDir", null);
         setIntervalWallpapersBtn = new JButton("set wallpapers");
         setIntervalWallpapersBtn.addActionListener((ae) -> startWallpaperIntervalAction(mainPanel));
         mainPanel.add(new JLabel("set wallpapers from a folder on an interval"), "shrinky,wrap,align 50%");
-        addWallpaperSelection(mainPanel);
+        addWallpaperDirectorySelection(mainPanel);
         mainPanel.add(getIntervalTimePanel(), "wrap");
         mainPanel.add(getStartTimePanel(), "wrap");
         mainPanel.add(setIntervalWallpapersBtn);
@@ -64,6 +63,7 @@ public class WallpaperView {
 
     private JPanel getStartTimePanel() {
         JPanel startTimeJPanel = new JPanel(new MigLayout("hidemode 1, insets 0"));
+        randomizeCB = new JCheckBox("randomize wallpapers");
         startTimeCB = new JCheckBox("start at specific time");
         startTimeCB.addActionListener((ae)-> {
             boolean startTimeEnabled = startTimeCB.isSelected();
@@ -74,7 +74,8 @@ public class WallpaperView {
         startTimeTextField = new JTextField(8);
         startTimeLabel.setVisible(false);
         startTimeTextField.setVisible(false);
-        startTimeJPanel.add(startTimeCB, "pad 0 -3.5 0 0,wrap");
+        startTimeJPanel.add(startTimeCB, "pad 0 -3.5 0 0");
+        startTimeJPanel.add(randomizeCB, "wrap");
         startTimeJPanel.add(startTimeLabel);
         startTimeJPanel.add(startTimeTextField);
         return startTimeJPanel;
@@ -100,7 +101,7 @@ public class WallpaperView {
         return timePanel;
     }
 
-    private void addWallpaperSelection(JPanel attachTo) {
+    private void addWallpaperDirectorySelection(JPanel attachTo) {
         JTextField wallpaperDirTF = new JTextField(20);
         wallpaperDirTF.setEditable(false);
         wallpaperDirTF.setFocusable(false);
@@ -156,11 +157,9 @@ public class WallpaperView {
         if (isRunningInterval) {
             setIntervalWallpapersBtn.setText("set wallpapers");
             isRunningInterval = false;
-            if (timer != null) {
-                timer.cancel();
-                timer = null;
-            }
             if (wallpaperFuture != null && !wallpaperFuture.isCancelled()) wallpaperFuture.cancel(false);
+            wallpaperTask.reset();
+
         } else {
             if (directory == null) {
                 JOptionPane.showMessageDialog(mainPanel, "must set a wallpaper directory", "Error", JOptionPane.ERROR_MESSAGE);
@@ -221,7 +220,7 @@ public class WallpaperView {
                 JOptionPane.showMessageDialog(mainPanel, "provided times are out-of-bounds", "Error", JOptionPane.ERROR_MESSAGE);
             }
             setIntervalWallpapersBtn.setText("cancel task");
-            wallpaperScheduler(intervalTime, startHour, startMinute, startSec);
+            wallpaperScheduler(intervalTime, startHour, startMinute, startSec, randomizeCB.isSelected());
             isRunningInterval = true;
         }
     }
@@ -266,17 +265,24 @@ public class WallpaperView {
         }
     }
 
-    private void wallpaperScheduler(long intervalMS, int startHour, int startMin, int startSec) {
+    private void wallpaperScheduler(long intervalMS, int startHour, int startMin, int startSec, boolean isRandom) {
         ZonedDateTime now = ZonedDateTime.now(ZoneId.systemDefault());
         ZonedDateTime nextRun = now.withHour(startHour).withMinute(startMin).withSecond(startSec);
         if (now.compareTo(nextRun) > 0) nextRun = nextRun.plusDays(1);
 
         Duration duration = Duration.between(now, nextRun);
         long initialDelay = duration.getSeconds() * 1000;
+        String localDir = this.directory;
+        Runnable setWallpaper;
+        if (isRandom) {
+            setWallpaper = wallpaperTask::setRandomWallpaper;
+        } else {
+            setWallpaper = wallpaperTask::setNextWallpaper;
+        }
         wallpaperFuture = SCHEDULER.scheduleAtFixedRate(() -> {
             try {
-                wallpaperTask.setDirectory(directory);
-                wallpaperTask.setRandomWallpaper();
+                wallpaperTask.setDirectory(localDir);
+                setWallpaper.run();
             } catch (Exception e) {
                 log.error(e.getMessage());
             }

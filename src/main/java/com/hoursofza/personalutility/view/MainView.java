@@ -27,7 +27,7 @@ public class MainView {
         mainFrame.setTitle("Personal Utility");
         JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.addTab("single", wallpaperView.initSingleWallpaperSection());
-        tabbedPane.addTab("interval", wallpaperView.initWallpaperCronSection());
+        tabbedPane.addTab("interval", wallpaperView.initIntervalWallpaperSection());
         mainFrame.add(tabbedPane);
         mainFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         mainFrame.pack();

@@ -17,11 +17,23 @@ public class WallpaperManager{
     List<String> wallpapers;
     String directory;
     Random rand = new Random();
+    private int currentIndex = 0;
+
     private static final String[] VALID_EXTENSIONS = new String[]{"jpg", "jpeg", "png"};
- 
+
+    public void reset() {
+        currentIndex = 0;
+    }
     public void setRandomWallpaper() {
         int item = rand.nextInt(wallpapers.size());
         setCurrentWallpaper(directory + wallpapers.get(item));
+    }
+
+    public void setNextWallpaper() {
+        if (currentIndex >= wallpapers.size()) currentIndex = 0;
+        String wallpaper = wallpapers.get(currentIndex);
+        setCurrentWallpaper(directory + wallpaper);
+        currentIndex++;
     }
 
     public void setDirectory(String dir) {
