@@ -1,4 +1,4 @@
-package com.hoursofza.personalutility;
+package com.hoursofza.personalutility.services;
 
 import java.io.BufferedReader;
 import java.io.IOException;

@@ -13,7 +13,8 @@ import javax.swing.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import com.hoursofza.personalutility.WallpaperManager;
+import com.hoursofza.personalutility.services.Scheduler;
+import com.hoursofza.personalutility.services.WallpaperManager;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -39,7 +40,7 @@ public class WallpaperView {
     JTextField startTimeTextField;
     private static final boolean DEBUG_LAYOUT = false;
     private static final String INIT_LAYOUT_TXT = DEBUG_LAYOUT ? "debug": "";
-    private static final ScheduledExecutorService SCHEDULER = Executors.newScheduledThreadPool(1);
+    ScheduledExecutorService SERVICE = Scheduler.getService();
     private ScheduledFuture<?> wallpaperFuture;
     private JCheckBox randomizeCB;
 
@@ -279,7 +280,7 @@ public class WallpaperView {
         } else {
             setWallpaper = wallpaperTask::setNextWallpaper;
         }
-        wallpaperFuture = SCHEDULER.scheduleAtFixedRate(() -> {
+        wallpaperFuture = SERVICE.scheduleAtFixedRate(() -> {
             try {
                 wallpaperTask.setDirectory(localDir);
                 setWallpaper.run();
