@@ -31,15 +31,31 @@ public class MouseService {
     long moveMouseInterval;
 
     public void init() throws AWTException {
-        robot = new Robot();
+        try {
+            robot = new Robot();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, e.getMessage(), "error", JOptionPane.ERROR_MESSAGE);
+        }
 
     }
     public void schedule(long seconds) throws InterruptedException {
-        Point starting = getCurrentPos();
-        robot.mouseMove(10, 10);
+        Point starting;
+        try {
+            starting = getCurrentPos();
+            robot = new Robot();
+            if(starting.x == 10) {
+                robot.mouseMove(20, 10);
+            } else {
+                robot.mouseMove(10,10);
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, e.getMessage(), "error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        Thread.sleep(30);
         Point testPos = getCurrentPos();
         robot.mouseMove(starting.x, starting.y);
-        if (!starting.equals(testPos)) {
+        if (starting.equals(testPos)) {
             JOptionPane.showMessageDialog(null, "cannot move mouse: missing permissions");
             return;
         }
