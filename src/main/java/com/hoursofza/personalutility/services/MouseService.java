@@ -84,8 +84,8 @@ public class MouseService {
 
     private int getRandomOffset() {
         Random r = new Random();
-        return r.nextInt(MAX_DIST) + 1;
-    
+        int sign = r.nextInt(2) > 0 ? 1 : -1;
+        return (r.nextInt(MAX_DIST) + 1) * sign;
     }
 
     private void startScheduler() {
