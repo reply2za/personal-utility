@@ -14,7 +14,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeListener;
-import java.util.concurrent.CompletableFuture;
 
 @Component
 @Slf4j
@@ -77,17 +76,19 @@ public class MainView {
                     JOptionPane.showMessageDialog(mainPanel, "invalid interval");
                     return;
                 }
-                moveMouseBtn.setText(STOP_MOUSE);
+                
                 long finalDelay = delay;
-                CompletableFuture.runAsync(()-> {
-                    try {
-                        mouseService.schedule(finalDelay);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                });
+                try {
+                    mouseService.schedule(finalDelay);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    JOptionPane.showMessageDialog(null, "there was an error");
+                }
+                moveMouseBtn.setText(STOP_MOUSE);
+                delayTF.setEditable(false);
             } else {
                 moveMouseBtn.setText(MOVE_MOUSE);
+                delayTF.setEditable(true);
                 mouseService.stop();
             }
         });

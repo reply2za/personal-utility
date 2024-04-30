@@ -52,7 +52,7 @@ public class MouseService {
             JOptionPane.showMessageDialog(null, e.getMessage(), "error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        Thread.sleep(30);
+        Thread.sleep(100);
         Point testPos = getCurrentPos();
         robot.mouseMove(starting.x, starting.y);
         if (starting.equals(testPos)) {
