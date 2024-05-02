@@ -5,6 +5,12 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
 public class TimeUtils {
+
+    private enum TimeFormat {
+        AM,
+        PM, 
+        _24
+    }
     
         /**
      * 
@@ -15,13 +21,16 @@ public class TimeUtils {
         int startHour = 0;
         int startMinute = 0;
         int startSec = 0;
-        boolean isPM = false;
+        TimeFormat timeFormat;
         timeTxt = timeTxt.toLowerCase();
         if (timeTxt.contains("am")) {
             timeTxt = timeTxt.replace("am", "");
+            timeFormat = TimeFormat.AM;
         } else if (timeTxt.contains("pm")){
             timeTxt = timeTxt.replace("pm", "");
-            isPM = true;
+            timeFormat = TimeFormat.PM;
+        } else {
+            timeFormat = TimeFormat._24;
         }
         String[] vals = timeTxt.split(":");
         if (vals.length != 2) {
@@ -34,7 +43,8 @@ public class TimeUtils {
         } catch(Exception e) {
             throw new IllegalStateException("Cannot parse start time");
         }
-        if (isPM && startHour < 12) startHour += 12;
+        if (timeFormat.equals(TimeFormat.PM) && startHour < 12) startHour += 12;
+        else if (timeFormat.equals(TimeFormat.AM) && startHour == 12) startHour = 0;
         return new int[]{startHour, startMinute, startSec};
     }
 
