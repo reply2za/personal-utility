@@ -3,7 +3,6 @@ import java.awt.AWTException;
 import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.Robot;
-import java.io.IOException;
 import java.util.Random;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -57,12 +56,12 @@ public class MouseService {
         Thread.sleep(100);
         Point testPos = getCurrentPos();
         robot.mouseMove(starting.x, starting.y);
-        if (starting.equals(testPos)) {
-            try {
-            ShellUtils.sendCommandToShell("tccutil reset Accessibility \"com.hoursofza.personalutility\"");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+            if (starting.equals(testPos)) {
+                try {
+                ShellUtils.sendCommandToShell("tccutil reset Accessibility \"com.hoursofza.personalutility\"");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             throw new RuntimeException("cannot move mouse: missing permissions");
         }
         this.moveMouseInterval = seconds;
@@ -76,7 +75,7 @@ public class MouseService {
     }
 
     public void stop() {
-        taskFuture.cancel(true);
+        if (taskFuture != null) taskFuture.cancel(true);
     }
 
     private void singleRun() {

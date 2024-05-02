@@ -11,7 +11,7 @@ public class TimeUtils {
      * @param timeTxt
      * @return hour, min, second in array format
      */
-    public static int[] convertTextToTime(String timeTxt) {
+    public static int[] convertTimeToArr(String timeTxt) {
         int startHour = 0;
         int startMinute = 0;
         int startSec = 0;
@@ -25,14 +25,14 @@ public class TimeUtils {
         }
         String[] vals = timeTxt.split(":");
         if (vals.length != 2) {
-            new IllegalStateException("invalid start time format");
+            throw new IllegalStateException("invalid start time format");
         }
         startSec = 0;
         try {
             startHour = Integer.parseInt(vals[0].trim());
             startMinute = Integer.parseInt(vals[1].trim());
         } catch(Exception e) {
-            new IllegalStateException("Cannot parse start time");
+            throw new IllegalStateException("Cannot parse start time");
         }
         if (isPM && startHour < 12) startHour += 12;
         return new int[]{startHour, startMinute, startSec};

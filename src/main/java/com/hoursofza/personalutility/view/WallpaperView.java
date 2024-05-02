@@ -192,7 +192,7 @@ public class WallpaperView {
             int startSec;
             if (startTimeCB.isSelected()) {
                 try {
-                    int[] res = TimeUtils.convertTextToTime(startTimeTextField.getText().toLowerCase());
+                    int[] res = TimeUtils.convertTimeToArr(startTimeTextField.getText().toLowerCase());
                     startHour = res[0];
                     startMinute = res[1];
                     startSec = res[2];

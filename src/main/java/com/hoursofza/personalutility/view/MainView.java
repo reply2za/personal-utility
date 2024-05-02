@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 import com.formdev.flatlaf.FlatLightLaf;
 import com.hoursofza.personalutility.services.MouseService;
 import com.hoursofza.personalutility.services.Scheduler;
-import com.hoursofza.personalutility.utils.ShellUtils;
 import com.hoursofza.personalutility.utils.TimeUtils;
 
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +16,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeListener;
-import java.io.IOException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -85,9 +83,10 @@ public class MainView {
         mainPanel.add(endTimePanel, "wrap");
         mainPanel.add(moveMouseBtn, "wrap");
 
-        Runnable stopAction = () ->{
+        Runnable stopAction = () -> {
             moveMouseBtn.setText(MOVE_MOUSE);
             delayTF.setEditable(true);
+            endTimeTF.setEditable(true);
             mouseService.stop();
         };
         moveMouseBtn.addActionListener((ae) -> {
@@ -95,11 +94,12 @@ public class MainView {
                 if (!endTimeTF.getText().isBlank()) {
                     int[] res ;
                     try {
-                        res = TimeUtils.convertTextToTime(endTimeTF.getText());
+                        res = TimeUtils.convertTimeToArr(endTimeTF.getText());
                     } catch(Exception e) {
                         JOptionPane.showMessageDialog(mainPanel, e.getMessage(), "error", JOptionPane.ERROR_MESSAGE);
                         return;
                     }
+                    System.out.println("ran");
                     long initialDelay = TimeUtils.timeToMS(res[0], res[1], res[2]);
                     cancelFuture = SERVICE.schedule(() -> {
                         try {
@@ -120,21 +120,22 @@ public class MainView {
                 }
                 if (delay < 1) {
                     stopAction.run();
-                    JOptionPane.showMessageDialog(mainPanel, "invalid interval");
+                    JOptionPane.showMessageDialog(mainPanel, "invalid interval", "error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
                 
                 long finalDelay = delay;
                 try {
                     mouseService.schedule(finalDelay);
-                } catch (InterruptedException e) {
+                } catch (Exception e) {
                     stopAction.run();
                     e.printStackTrace();
-                    JOptionPane.showMessageDialog(null, e.getMessage(), "error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(mainPanel, e.getMessage());
                     return;
                 }
                 moveMouseBtn.setText(STOP_MOUSE);
                 delayTF.setEditable(false);
+                endTimeTF.setEditable(false);
             } else {
                 stopAction.run();
             }

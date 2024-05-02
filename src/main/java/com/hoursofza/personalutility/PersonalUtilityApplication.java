@@ -10,6 +10,7 @@ public class PersonalUtilityApplication {
 		if (System.getProperty("os.name").contains("Mac")) {
 			System.setProperty("apple.laf.useScreenMenuBar", "true");
 			System.setProperty("apple.awt.application.appearance", "system");
+			// System.setProperty("apple.awt.UIElement", "true");
 		}
 		SpringApplicationBuilder builder = new SpringApplicationBuilder(PersonalUtilityApplication.class);
 		builder.headless(false);
