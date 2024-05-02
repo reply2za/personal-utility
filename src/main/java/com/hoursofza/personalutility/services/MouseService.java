@@ -3,6 +3,7 @@ import java.awt.AWTException;
 import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.Robot;
+import java.io.IOException;
 import java.util.Random;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -11,6 +12,8 @@ import java.util.concurrent.TimeUnit;
 import javax.swing.JOptionPane;
 
 import org.springframework.stereotype.Component;
+
+import com.hoursofza.personalutility.utils.ShellUtils;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -49,15 +52,18 @@ public class MouseService {
                 robot.mouseMove(10,10);
             }
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, e.getMessage(), "error", JOptionPane.ERROR_MESSAGE);
-            return;
+            throw new RuntimeException(e);
         }
         Thread.sleep(100);
         Point testPos = getCurrentPos();
         robot.mouseMove(starting.x, starting.y);
         if (starting.equals(testPos)) {
-            JOptionPane.showMessageDialog(null, "cannot move mouse: missing permissions");
-            return;
+            try {
+            ShellUtils.sendCommandToShell("tccutil reset Accessibility \"com.hoursofza.personalutility\"");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+            throw new RuntimeException("cannot move mouse: missing permissions");
         }
         this.moveMouseInterval = seconds;
         if (seconds > pollingDelay) {

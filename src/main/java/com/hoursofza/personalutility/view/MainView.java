@@ -6,6 +6,9 @@ import org.springframework.stereotype.Component;
 
 import com.formdev.flatlaf.FlatLightLaf;
 import com.hoursofza.personalutility.services.MouseService;
+import com.hoursofza.personalutility.services.Scheduler;
+import com.hoursofza.personalutility.utils.ShellUtils;
+import com.hoursofza.personalutility.utils.TimeUtils;
 
 import lombok.extern.slf4j.Slf4j;
 import net.miginfocom.swing.MigLayout;
@@ -14,6 +17,10 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeListener;
+import java.io.IOException;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 @Component
 @Slf4j
@@ -22,6 +29,8 @@ public class MainView {
     private static String MOVE_MOUSE = "move mouse";
     private static String STOP_MOUSE = "stop mouse";
     private MouseService mouseService;
+    ScheduledExecutorService SERVICE = Scheduler.getService();
+    ScheduledFuture<?> cancelFuture;
 
     static {
         FlatLightLaf.setup();
@@ -33,6 +42,7 @@ public class MainView {
     }
 
     MainView(WallpaperView wallpaperView, MouseService mouseService) {
+        
         this.mouseService = mouseService;
         try {
             mouseService.init();
@@ -64,8 +74,44 @@ public class MainView {
         JButton moveMouseBtn = new JButton(MOVE_MOUSE);
         JLabel delayLabel = new JLabel("interval (seconds): ");
         JTextField delayTF = new JTextField(10);
+  
+        JPanel endTimePanel = new JPanel();
+        JLabel endTimeLabel = new JLabel("end time:");
+        JTextField endTimeTF = new JTextField();
+        endTimePanel.add(endTimeLabel);
+        endTimePanel.add(endTimeTF);
+        mainPanel.add(delayLabel);
+        mainPanel.add(delayTF, "wrap");
+        mainPanel.add(endTimePanel, "wrap");
+        mainPanel.add(moveMouseBtn, "wrap");
+
+        Runnable stopAction = () ->{
+            moveMouseBtn.setText(MOVE_MOUSE);
+            delayTF.setEditable(true);
+            mouseService.stop();
+        };
         moveMouseBtn.addActionListener((ae) -> {
             if (moveMouseBtn.getText().contains(MOVE_MOUSE)) {
+                if (!endTimeTF.getText().isBlank()) {
+                    int[] res ;
+                    try {
+                        res = TimeUtils.convertTextToTime(endTimeTF.getText());
+                    } catch(Exception e) {
+                        JOptionPane.showMessageDialog(mainPanel, e.getMessage(), "error", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                    long initialDelay = TimeUtils.timeToMS(res[0], res[1], res[2]);
+                    cancelFuture = SERVICE.schedule(() -> {
+                        try {
+                            stopAction.run();
+                        } catch (Exception e) {
+                            log.error(e.getMessage());
+                        }
+                    },
+                    initialDelay,
+                    TimeUnit.MILLISECONDS
+                    );
+                }
                 long delay; 
                 try {
                     delay = Long.parseLong(delayTF.getText());
@@ -73,6 +119,7 @@ public class MainView {
                     delay = -1;
                 }
                 if (delay < 1) {
+                    stopAction.run();
                     JOptionPane.showMessageDialog(mainPanel, "invalid interval");
                     return;
                 }
@@ -81,20 +128,19 @@ public class MainView {
                 try {
                     mouseService.schedule(finalDelay);
                 } catch (InterruptedException e) {
+                    stopAction.run();
                     e.printStackTrace();
-                    JOptionPane.showMessageDialog(null, "there was an error");
+                    JOptionPane.showMessageDialog(null, e.getMessage(), "error", JOptionPane.ERROR_MESSAGE);
+                    return;
                 }
                 moveMouseBtn.setText(STOP_MOUSE);
                 delayTF.setEditable(false);
             } else {
-                moveMouseBtn.setText(MOVE_MOUSE);
-                delayTF.setEditable(true);
-                mouseService.stop();
+                stopAction.run();
             }
         });
-        mainPanel.add(delayLabel);
-        mainPanel.add(delayTF, "wrap");
-        mainPanel.add(moveMouseBtn);
+
+
         return mainPanel;
     }
 

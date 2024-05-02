@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import com.hoursofza.personalutility.services.Scheduler;
 import com.hoursofza.personalutility.services.WallpaperManager;
+import com.hoursofza.personalutility.utils.TimeUtils;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -190,28 +191,15 @@ public class WallpaperView {
             int startMinute;
             int startSec;
             if (startTimeCB.isSelected()) {
-                String timeTxt = startTimeTextField.getText().toLowerCase();
-                boolean isPM = false;
-                if (timeTxt.toLowerCase().contains("am")) {
-                    timeTxt = timeTxt.replace("am", "");
-                } else if (timeTxt.toLowerCase().contains("pm")){
-                    timeTxt = timeTxt.replace("pm", "");
-                    isPM = true;
-                }
-                String[] vals = timeTxt.split(":");
-                if (vals.length != 2) {
-                    JOptionPane.showMessageDialog(mainPanel, "invalid start time format", "Error", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-                startSec = 0;
                 try {
-                    startHour = Integer.parseInt(vals[0].trim());
-                    startMinute = Integer.parseInt(vals[1].trim());
-                } catch(Exception e) {
-                    JOptionPane.showMessageDialog(mainPanel, "Cannot parse start time", "Error", JOptionPane.ERROR_MESSAGE);
+                    int[] res = TimeUtils.convertTextToTime(startTimeTextField.getText().toLowerCase());
+                    startHour = res[0];
+                    startMinute = res[1];
+                    startSec = res[2];
+                } catch (Exception e) {
+                    JOptionPane.showMessageDialog(mainPanel, e.getMessage(), "Error", JOptionPane.ERROR);
                     return;
                 }
-                if (isPM) startHour += 12;
             } else {
                 startHour = ZonedDateTime.now().getHour();
                 startMinute = ZonedDateTime.now().getMinute();
@@ -225,6 +213,8 @@ public class WallpaperView {
             isRunningInterval = true;
         }
     }
+
+
 
     private void addWallpaper(JComponent reference, String fileName) {
         if (fileName.isBlank()) {
@@ -267,12 +257,7 @@ public class WallpaperView {
     }
 
     private void wallpaperScheduler(long intervalMS, int startHour, int startMin, int startSec, boolean isRandom) {
-        ZonedDateTime now = ZonedDateTime.now(ZoneId.systemDefault());
-        ZonedDateTime nextRun = now.withHour(startHour).withMinute(startMin).withSecond(startSec);
-        if (now.compareTo(nextRun) > 0) nextRun = nextRun.plusDays(1);
-
-        Duration duration = Duration.between(now, nextRun);
-        long initialDelay = duration.getSeconds() * 1000;
+        long initialDelay = TimeUtils.timeToMS(startHour, startMin, startSec);
         String localDir = this.directory;
         Runnable setWallpaper;
         if (isRandom) {

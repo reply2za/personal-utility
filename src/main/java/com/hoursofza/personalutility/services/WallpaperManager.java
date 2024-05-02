@@ -1,13 +1,13 @@
 package com.hoursofza.personalutility.services;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Stream;
 
 import org.springframework.stereotype.Component;
+
+import com.hoursofza.personalutility.utils.ShellUtils;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -70,7 +70,7 @@ public class WallpaperManager{
     private void setWallpaperBasedOnDir() {
         String getWallpapersCmd = "cd " + directory + "&& ls";
         try {
-            wallpapers = Stream.of(sendCommandToShell(getWallpapersCmd).split("\n")).filter(item-> {
+            wallpapers = Stream.of(ShellUtils.sendCommandToShell(getWallpapersCmd).split("\n")).filter(item-> {
                 boolean isValid = false;
                 for (String ext: VALID_EXTENSIONS) {
                     if (item.endsWith("." + ext)) return true;
@@ -82,18 +82,7 @@ public class WallpaperManager{
         }
     }
 
-    private String sendCommandToShell(String command) throws InterruptedException, IOException {
-        String[] args = { "/bin/bash", "-c", command };
-        Process proc = new ProcessBuilder(args).start();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-        String line;
-        StringBuilder sb = new StringBuilder();
-        while ((line = reader.readLine()) != null) {
-            sb.append(line).append("\n");
-        }
-        proc.waitFor();
-        return sb.toString();
-    }
+
 
 
  }
