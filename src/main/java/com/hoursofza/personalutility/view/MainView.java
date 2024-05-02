@@ -40,7 +40,7 @@ public class MainView {
     }
 
     MainView(WallpaperView wallpaperView, MouseService mouseService) {
-        
+
         this.mouseService = mouseService;
         try {
             mouseService.init();
@@ -50,7 +50,8 @@ public class MainView {
         mainFrame.setTitle("Personal Utility");
         JTabbedPane tabbedPane = new JTabbedPane();
         int metaKey = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
-        tabbedPane.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_W, metaKey), "doEnterAction");
+        tabbedPane.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_W, metaKey),
+                "doEnterAction");
         tabbedPane.getActionMap().put("doEnterAction", new CloseAction());
         tabbedPane.addTab("general", generalPanel());
         tabbedPane.addTab("single", wallpaperView.initSingleWallpaperSection());
@@ -72,7 +73,7 @@ public class MainView {
         JButton moveMouseBtn = new JButton(MOVE_MOUSE);
         JLabel delayLabel = new JLabel("interval (seconds): ");
         JTextField delayTF = new JTextField(10);
-  
+
         JPanel endTimePanel = new JPanel();
         JLabel endTimeLabel = new JLabel("end time:");
         JTextField endTimeTF = new JTextField();
@@ -92,10 +93,10 @@ public class MainView {
         moveMouseBtn.addActionListener((ae) -> {
             if (moveMouseBtn.getText().contains(MOVE_MOUSE)) {
                 if (!endTimeTF.getText().isBlank()) {
-                    int[] res ;
+                    int[] res;
                     try {
                         res = TimeUtils.convertTimeToArr(endTimeTF.getText());
-                    } catch(Exception e) {
+                    } catch (Exception e) {
                         JOptionPane.showMessageDialog(mainPanel, e.getMessage(), "error", JOptionPane.ERROR_MESSAGE);
                         return;
                     }
@@ -108,11 +109,10 @@ public class MainView {
                             log.error(e.getMessage());
                         }
                     },
-                    initialDelay,
-                    TimeUnit.MILLISECONDS
-                    );
+                            initialDelay,
+                            TimeUnit.MILLISECONDS);
                 }
-                long delay; 
+                long delay;
                 try {
                     delay = Long.parseLong(delayTF.getText());
                 } catch (Exception ignored) {
@@ -123,14 +123,14 @@ public class MainView {
                     JOptionPane.showMessageDialog(mainPanel, "invalid interval", "error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
-                
+
                 long finalDelay = delay;
                 try {
                     mouseService.schedule(finalDelay);
                 } catch (Exception e) {
                     stopAction.run();
                     e.printStackTrace();
-                    JOptionPane.showMessageDialog(mainPanel, e.getMessage());
+                    JOptionPane.showMessageDialog(mainPanel, e.getMessage(), "error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
                 moveMouseBtn.setText(STOP_MOUSE);
@@ -140,7 +140,6 @@ public class MainView {
                 stopAction.run();
             }
         });
-
 
         return mainPanel;
     }

@@ -1,4 +1,5 @@
 package com.hoursofza.personalutility.services;
+
 import java.awt.AWTException;
 import java.awt.MouseInfo;
 import java.awt.Point;
@@ -21,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 public class MouseService {
 
     ScheduledExecutorService SERVICE = Scheduler.getService();
-    Point prevPosition = null; 
+    Point prevPosition = null;
     ScheduledFuture<?> taskFuture;
     ScheduledFuture<?> pollingFuture;
     Robot robot;
@@ -40,15 +41,16 @@ public class MouseService {
         }
 
     }
+
     public void schedule(long seconds) throws InterruptedException {
         Point starting;
         try {
             starting = getCurrentPos();
             robot = new Robot();
-            if(starting.x == 10) {
+            if (starting.x == 10) {
                 robot.mouseMove(20, 10);
             } else {
-                robot.mouseMove(10,10);
+                robot.mouseMove(10, 10);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -56,8 +58,8 @@ public class MouseService {
         Thread.sleep(100);
         Point testPos = getCurrentPos();
         robot.mouseMove(starting.x, starting.y);
-            if (starting.equals(testPos)) {
-                try {
+        if (starting.equals(testPos)) {
+            try {
                 ShellUtils.sendCommandToShell("tccutil reset Accessibility \"com.hoursofza.personalutility\"");
             } catch (Exception e) {
                 e.printStackTrace();
@@ -67,19 +69,24 @@ public class MouseService {
         this.moveMouseInterval = seconds;
         if (seconds > pollingDelay) {
             pollRunnable = () -> {
-                pollingFuture = SERVICE.scheduleAtFixedRate(this::restartSchedulerIfMoved, INIT_POLL_DELAY_SEC, pollingDelay, TimeUnit.SECONDS);
+                pollingFuture = SERVICE.scheduleAtFixedRate(this::restartSchedulerIfMoved, INIT_POLL_DELAY_SEC,
+                        pollingDelay, TimeUnit.SECONDS);
             };
-        } else pollRunnable = ()-> {};
+        } else
+            pollRunnable = () -> {
+            };
         pollRunnable.run();
         startScheduler();
     }
 
     public void stop() {
-        if (taskFuture != null) taskFuture.cancel(true);
+        if (taskFuture != null)
+            taskFuture.cancel(true);
     }
 
     private void singleRun() {
-        if (pollingFuture != null) pollingFuture.cancel(true);
+        if (pollingFuture != null)
+            pollingFuture.cancel(true);
         Point currentPosition = getCurrentPos();
         if (isIdle(currentPosition)) {
             int pointX = currentPosition.x + getRandomOffset();
@@ -100,7 +107,8 @@ public class MouseService {
     }
 
     private boolean isIdle(Point currentPos) {
-        return (Math.abs(currentPos.getX() - prevPosition.x) < MIN_DIST && Math.abs(currentPos.getY() - prevPosition.y) < MIN_DIST);
+        return (Math.abs(currentPos.getX() - prevPosition.x) < MIN_DIST
+                && Math.abs(currentPos.getY() - prevPosition.y) < MIN_DIST);
     }
 
     private int getRandomOffset() {
@@ -111,19 +119,17 @@ public class MouseService {
 
     private void startScheduler() {
         prevPosition = getCurrentPos();
-        taskFuture = SERVICE.scheduleAtFixedRate(()-> {
+        taskFuture = SERVICE.scheduleAtFixedRate(() -> {
             try {
                 singleRun();
-            } catch(Exception e) {
+            } catch (Exception e) {
                 log.error("could not run single execution: {}", e.getMessage());
             }
-        }
-        , moveMouseInterval, moveMouseInterval, TimeUnit.SECONDS);
+        }, moveMouseInterval, moveMouseInterval, TimeUnit.SECONDS);
     }
 
     private Point getCurrentPos() {
         return MouseInfo.getPointerInfo().getLocation();
     }
 
-    
 }
