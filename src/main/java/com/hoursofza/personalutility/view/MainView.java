@@ -72,11 +72,11 @@ public class MainView {
         JPanel mainPanel = new JPanel(new MigLayout("", "[][]"));
         JButton moveMouseBtn = new JButton(MOVE_MOUSE);
         JLabel delayLabel = new JLabel("interval (seconds): ");
-        JTextField delayTF = new JTextField(10);
+        JTextField delayTF = new JTextField(8);
 
         JPanel endTimePanel = new JPanel();
         JLabel endTimeLabel = new JLabel("end time:");
-        JTextField endTimeTF = new JTextField();
+        JTextField endTimeTF = new JTextField(8);
         endTimePanel.add(endTimeLabel);
         endTimePanel.add(endTimeTF);
         mainPanel.add(delayLabel);
