@@ -28,11 +28,14 @@ public class MouseService {
     Robot robot;
     private static final int MIN_DIST = 2;
     private static final int MAX_DIST = 5;
+    private static final int ZEN_DIST = 3;
     int pollingDelay = 10;
     private final static int INIT_POLL_DELAY_SEC = 2;
     Runnable pollRunnable;
     long moveMouseInterval;
     boolean isZenJiggle;
+    Random random = new Random();
+
 
     public void init() throws AWTException {
         try {
@@ -60,7 +63,7 @@ public class MouseService {
         Thread.sleep(100);
         Point testPos = getCurrentPos();
         robot.mouseMove(starting.x, starting.y);
-        if (starting.equals(testPos)) {
+        if (Math.abs(starting.x - testPos.x) < 10 && Math.abs(starting.y - testPos.y) < 10) {
             try {
                 ShellUtils.sendCommandToShell("tccutil reset Accessibility \"com.hoursofza.personalutility\"");
             } catch (Exception e) {
@@ -91,18 +94,29 @@ public class MouseService {
             pollingFuture.cancel(true);
         Point initialPosition = getCurrentPos();
         if (isIdle(initialPosition)) {
-            int pointX = initialPosition.x + getRandomOffset();
-            int pointY = initialPosition.y + getRandomOffset();
-            prevPosition = new Point(pointX, pointY);
-            robot.mouseMove(pointX, pointY);
             if (this.isZenJiggle) {
+                moveMouseRandom(initialPosition, ZEN_DIST);
+                try {
+                    Thread.sleep(3);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 prevPosition = initialPosition;
                 robot.mouseMove(initialPosition.x, initialPosition.y);
+            } else {
+                moveMouseRandom(initialPosition, MAX_DIST);
             }
         } else {
             prevPosition = new Point(initialPosition.x, initialPosition.y);
         }
         pollRunnable.run();
+    }
+
+    private void moveMouseRandom(Point initialPosition, int distance) {
+        int pointX = initialPosition.x + getRandomOffset(distance);
+        int pointY = initialPosition.y + getRandomOffset(distance);
+        prevPosition = new Point(pointX, pointY);
+        robot.mouseMove(pointX, pointY);
     }
 
     private void restartSchedulerIfMoved() {
@@ -117,10 +131,9 @@ public class MouseService {
                 && Math.abs(currentPos.getY() - prevPosition.y) < MIN_DIST);
     }
 
-    private int getRandomOffset() {
-        Random r = new Random();
-        int sign = r.nextInt(2) > 0 ? 1 : -1;
-        return (r.nextInt(MAX_DIST) + 1) * sign;
+    private int getRandomOffset(int distance) {
+        int sign = random.nextInt(2) > 0 ? 1 : -1;
+        return (random.nextInt(distance) + 1) * sign;
     }
 
     private void startScheduler() {
