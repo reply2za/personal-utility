@@ -32,6 +32,7 @@ public class MouseService {
     private final static int INIT_POLL_DELAY_SEC = 2;
     Runnable pollRunnable;
     long moveMouseInterval;
+    boolean isZenJiggle;
 
     public void init() throws AWTException {
         try {
@@ -42,8 +43,9 @@ public class MouseService {
 
     }
 
-    public void schedule(long seconds) throws InterruptedException {
+    public void schedule(long seconds, boolean isZenJiggle) throws InterruptedException {
         Point starting;
+        this.isZenJiggle = isZenJiggle;
         try {
             starting = getCurrentPos();
             robot = new Robot();
@@ -87,14 +89,18 @@ public class MouseService {
     private void singleRun() {
         if (pollingFuture != null)
             pollingFuture.cancel(true);
-        Point currentPosition = getCurrentPos();
-        if (isIdle(currentPosition)) {
-            int pointX = currentPosition.x + getRandomOffset();
-            int pointY = currentPosition.y + getRandomOffset();
+        Point initialPosition = getCurrentPos();
+        if (isIdle(initialPosition)) {
+            int pointX = initialPosition.x + getRandomOffset();
+            int pointY = initialPosition.y + getRandomOffset();
             prevPosition = new Point(pointX, pointY);
             robot.mouseMove(pointX, pointY);
+            if (this.isZenJiggle) {
+                prevPosition = initialPosition;
+                robot.mouseMove(initialPosition.x, initialPosition.y);
+            }
         } else {
-            prevPosition = new Point(currentPosition.x, currentPosition.y);
+            prevPosition = new Point(initialPosition.x, initialPosition.y);
         }
         pollRunnable.run();
     }

@@ -1,8 +1,6 @@
-package com.hoursofza.personalutility.view;
+package com.hoursofza.personalutility.view.panels;
 
 import java.io.File;
-import java.time.Duration;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.concurrent.*;

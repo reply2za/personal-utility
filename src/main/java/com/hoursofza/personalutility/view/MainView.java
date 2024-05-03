@@ -5,30 +5,19 @@ import javax.swing.*;
 import org.springframework.stereotype.Component;
 
 import com.formdev.flatlaf.FlatLightLaf;
-import com.hoursofza.personalutility.services.MouseService;
-import com.hoursofza.personalutility.services.Scheduler;
-import com.hoursofza.personalutility.utils.TimeUtils;
+import com.hoursofza.personalutility.view.panels.MousePanelView;
+import com.hoursofza.personalutility.view.panels.WallpaperView;
 
-import lombok.extern.slf4j.Slf4j;
-import net.miginfocom.swing.MigLayout;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeListener;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 
 @Component
-@Slf4j
 public class MainView {
     JFrame mainFrame = new JFrame();
-    private static String MOVE_MOUSE = "move mouse";
-    private static String STOP_MOUSE = "stop mouse";
-    private MouseService mouseService;
-    ScheduledExecutorService SERVICE = Scheduler.getService();
-    ScheduledFuture<?> cancelFuture;
+
 
     static {
         FlatLightLaf.setup();
@@ -39,21 +28,16 @@ public class MainView {
         }
     }
 
-    MainView(WallpaperView wallpaperView, MouseService mouseService) {
+    MainView(WallpaperView wallpaperView, MousePanelView mousePanelView) {
 
-        this.mouseService = mouseService;
-        try {
-            mouseService.init();
-        } catch (AWTException e) {
-            log.error("could not initialize mouse service: ", e);
-        }
+
         mainFrame.setTitle("Personal Utility");
         JTabbedPane tabbedPane = new JTabbedPane();
         int metaKey = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
         tabbedPane.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_W, metaKey),
-                "doEnterAction");
-        tabbedPane.getActionMap().put("doEnterAction", new CloseAction());
-        tabbedPane.addTab("general", generalPanel());
+                "doQuitAction");
+        tabbedPane.getActionMap().put("doQuitAction", new CloseAction());
+        tabbedPane.addTab("general", mousePanelView.getPanel());
         tabbedPane.addTab("single", wallpaperView.initSingleWallpaperSection());
         tabbedPane.addTab("interval", wallpaperView.initIntervalWallpaperSection());
         mainFrame.add(tabbedPane);
@@ -64,87 +48,24 @@ public class MainView {
         SystemTray.addAppToTray();
         SystemTray.openMainMenu.addActionListener((ae) -> {
             mainFrame.setVisible(true);
+            toFront();
+            mainFrame.requestFocus();
+            mainFrame.repaint();
+            toFront();
         });
         mainFrame.setVisible(true);
     }
 
-    private JPanel generalPanel() {
-        JPanel mainPanel = new JPanel(new MigLayout("", "[][]"));
-        JButton moveMouseBtn = new JButton(MOVE_MOUSE);
-        JPanel intervalPanel = new JPanel();
-        JLabel delayLabel = new JLabel("interval (seconds): ");
-        JTextField delayTF = new JTextField(8);
-        intervalPanel.add(delayLabel);
-        intervalPanel.add(delayTF);
-
-        JPanel endTimePanel = new JPanel();
-        JLabel endTimeLabel = new JLabel("end time:");
-        JTextField endTimeTF = new JTextField(8);
-        endTimePanel.add(endTimeLabel);
-        endTimePanel.add(endTimeTF);
-        mainPanel.add(intervalPanel, "wrap");
-        mainPanel.add(endTimePanel, "wrap");
-        mainPanel.add(moveMouseBtn, "wrap");
-
-        Runnable stopAction = () -> {
-            moveMouseBtn.setText(MOVE_MOUSE);
-            delayTF.setEditable(true);
-            endTimeTF.setEditable(true);
-            mouseService.stop();
-        };
-        moveMouseBtn.addActionListener((ae) -> {
-            if (moveMouseBtn.getText().contains(MOVE_MOUSE)) {
-                if (!endTimeTF.getText().isBlank()) {
-                    int[] res;
-                    try {
-                        res = TimeUtils.convertTimeToArr(endTimeTF.getText());
-                    } catch (Exception e) {
-                        JOptionPane.showMessageDialog(mainPanel, e.getMessage(), "error", JOptionPane.ERROR_MESSAGE);
-                        return;
-                    }
-                    System.out.println("ran");
-                    long initialDelay = TimeUtils.timeToMS(res[0], res[1], res[2]);
-                    cancelFuture = SERVICE.schedule(() -> {
-                        try {
-                            stopAction.run();
-                        } catch (Exception e) {
-                            log.error(e.getMessage());
-                        }
-                    },
-                            initialDelay,
-                            TimeUnit.MILLISECONDS);
-                }
-                long delay;
-                try {
-                    delay = Long.parseLong(delayTF.getText());
-                } catch (Exception ignored) {
-                    delay = -1;
-                }
-                if (delay < 1) {
-                    stopAction.run();
-                    JOptionPane.showMessageDialog(mainPanel, "invalid interval", "error", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-
-                long finalDelay = delay;
-                try {
-                    mouseService.schedule(finalDelay);
-                } catch (Exception e) {
-                    stopAction.run();
-                    e.printStackTrace();
-                    JOptionPane.showMessageDialog(mainPanel, e.getMessage(), "error", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-                moveMouseBtn.setText(STOP_MOUSE);
-                delayTF.setEditable(false);
-                endTimeTF.setEditable(false);
-            } else {
-                stopAction.run();
-            }
-        });
-
-        return mainPanel;
+    public void toFront() {
+        int sta = mainFrame.getExtendedState() & ~JFrame.ICONIFIED & JFrame.NORMAL;
+        mainFrame.setExtendedState(sta);
+        mainFrame.setAlwaysOnTop(true);
+        mainFrame.toFront();
+        mainFrame.requestFocus();
+        mainFrame.setAlwaysOnTop(false);
     }
+
+  
 
     private final class CloseAction implements Action {
 
