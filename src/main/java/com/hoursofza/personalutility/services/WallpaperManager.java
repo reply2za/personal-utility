@@ -8,6 +8,7 @@ import java.util.stream.Stream;
 import org.springframework.stereotype.Component;
 
 import com.hoursofza.personalutility.utils.ShellUtils;
+import com.hoursofza.personalutility.view.SystemTray;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -18,8 +19,20 @@ public class WallpaperManager{
     String directory;
     Random rand = new Random();
     private int currentIndex = 0;
+    public static native int SystemParametersInfo(int uiAction,int uiParam,String pvParam,int fWinIni);
+    private static final String SLASH;
 
     private static final String[] VALID_EXTENSIONS = new String[]{"jpg", "jpeg", "png"};
+
+    static
+    {
+        if (SystemTray.windows) {
+            System.loadLibrary("user32");
+            SLASH = "\\";
+        } else {
+            SLASH = "/";
+        }
+    }
 
     public void reset() {
         currentIndex = 0;
@@ -37,8 +50,8 @@ public class WallpaperManager{
     }
 
     public void setDirectory(String dir) {
-        if (!dir.endsWith("/")) {
-            dir += "/";
+        if (!dir.endsWith(SLASH)) {
+            dir += SLASH;
         }
         this.directory = dir;
         setWallpaperBasedOnDir();
@@ -49,6 +62,9 @@ public class WallpaperManager{
      * Ensure setDirectory has been called.
      */
     public static void setCurrentWallpaper(String fullPath) {
+        if (SystemTray.windows) {
+            SystemParametersInfo(20, 0, fullPath, 0);
+        } else {
         String script = """
             tell application "System Events"
             tell every desktop
@@ -65,6 +81,8 @@ public class WallpaperManager{
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+    }
+
     }
 
     private void setWallpaperBasedOnDir() {
