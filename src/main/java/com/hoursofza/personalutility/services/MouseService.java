@@ -29,6 +29,7 @@ public class MouseService {
     private static final int MIN_DIST = 2;
     private static final int MAX_DIST = 5;
     private static final int ZEN_DIST = 3;
+    private static final int ZEN_THREAD_SLEEP_MS = 4;
     int pollingDelay = 10;
     private final static int INIT_POLL_DELAY_SEC = 2;
     Runnable pollRunnable;
@@ -97,7 +98,7 @@ public class MouseService {
             if (this.isZenJiggle) {
                 moveMouseRandom(initialPosition, ZEN_DIST);
                 try {
-                    Thread.sleep(3);
+                    Thread.sleep(ZEN_THREAD_SLEEP_MS);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
