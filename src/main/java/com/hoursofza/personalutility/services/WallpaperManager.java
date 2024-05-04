@@ -9,6 +9,9 @@ import org.springframework.stereotype.Component;
 
 import com.hoursofza.personalutility.utils.ShellUtils;
 import com.hoursofza.personalutility.view.SystemTray;
+import com.sun.jna.Library;
+import com.sun.jna.Native;
+import com.sun.jna.win32.W32APIOptions;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -21,7 +24,6 @@ public class WallpaperManager{
     private int currentIndex = 0;
     public static native int SystemParametersInfo(int uiAction,int uiParam,String pvParam,int fWinIni);
     private static final String SLASH;
-
     private static final String[] VALID_EXTENSIONS = new String[]{"jpg", "jpeg", "png"};
 
     static
@@ -32,6 +34,11 @@ public class WallpaperManager{
         } else {
             SLASH = "/";
         }
+    }
+
+    public static interface User32 extends Library {
+        User32 INSTANCE = (User32) Native.loadLibrary("user32",User32.class,W32APIOptions.DEFAULT_OPTIONS);        
+        boolean SystemParametersInfo (int one, int two, String s ,int three);         
     }
 
     public void reset() {
@@ -57,13 +64,13 @@ public class WallpaperManager{
         setWallpaperBasedOnDir();
     }
  
- 
     /**
      * Ensure setDirectory has been called.
      */
     public static void setCurrentWallpaper(String fullPath) {
         if (SystemTray.windows) {
-            SystemParametersInfo(20, 0, fullPath, 0);
+            if (fullPath.startsWith("/")) fullPath = fullPath.substring(1);
+            User32.INSTANCE.SystemParametersInfo(0x0014, 0, fullPath , 1);
         } else {
         String script = """
             tell application "System Events"
@@ -86,7 +93,7 @@ public class WallpaperManager{
     }
 
     private void setWallpaperBasedOnDir() {
-        String getWallpapersCmd = "cd " + directory + "&& ls";
+        String getWallpapersCmd = SystemTray.windows ? "ls -n " + directory : "cd " + directory + " && ls";
         try {
             wallpapers = Stream.of(ShellUtils.sendCommandToShell(getWallpapersCmd).split("\n")).filter(item-> {
                 boolean isValid = false;
