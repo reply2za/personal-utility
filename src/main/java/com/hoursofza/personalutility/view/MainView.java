@@ -13,10 +13,13 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeListener;
+import java.io.IOException;
+import java.net.ServerSocket;
 
 @Component
 public class MainView {
     JFrame mainFrame = new JFrame();
+    static int PORT = 47181;
 
 
     static {
@@ -26,11 +29,31 @@ public class MainView {
         } catch (UnsupportedLookAndFeelException e) {
 
         }
+        assertNoOtherInstanceRunning();
     }
 
+    	public static void assertNoOtherInstanceRunning() {     
+		new Thread(() -> {
+		final AutoCloseable ac;
+			try {
+				ac = new ServerSocket(47181).accept();
+			} catch (IOException e) {
+				JOptionPane.showMessageDialog(null, "app is already running...");
+				System.exit(1);
+				return;
+			}
+			Runtime.getRuntime().addShutdownHook(new Thread(()-> {
+				try {
+					ac.close();
+				} catch (Exception ignored) {
+					
+				}
+			})); 
+		}).start();  
+
+	}
+
     MainView(WallpaperView wallpaperView, MousePanelView mousePanelView) {
-
-
         mainFrame.setTitle("Personal Utility");
         JTabbedPane tabbedPane = new JTabbedPane();
         int metaKey = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
