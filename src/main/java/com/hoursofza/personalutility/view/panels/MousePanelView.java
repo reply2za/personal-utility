@@ -73,6 +73,7 @@ public class MousePanelView {
             moveMouseBtn.setText(MOVE_MOUSE);
             delayTF.setEditable(true);
             endTimeTF.setEditable(true);
+            zenCB.setEnabled(true);
             mouseService.stop();
         };
         moveMouseBtn.addActionListener((ae) -> {
@@ -121,6 +122,7 @@ public class MousePanelView {
                 moveMouseBtn.setText(STOP_MOUSE);
                 delayTF.setEditable(false);
                 endTimeTF.setEditable(false);
+                zenCB.setEnabled(false);
             } else {
                 stopAction.run();
             }
