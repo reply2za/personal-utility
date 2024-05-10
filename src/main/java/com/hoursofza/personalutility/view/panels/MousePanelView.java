@@ -3,6 +3,7 @@ package com.hoursofza.personalutility.view.panels;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.prefs.Preferences;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -18,6 +19,7 @@ import com.hoursofza.personalutility.services.MouseService;
 import com.hoursofza.personalutility.services.Scheduler;
 import com.hoursofza.personalutility.utils.TimeUtils;
 
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import net.miginfocom.swing.MigLayout;
 
@@ -30,7 +32,8 @@ public class MousePanelView {
     private MouseService mouseService;
     ScheduledExecutorService SERVICE = Scheduler.getService();
     ScheduledFuture<?> cancelFuture;
-
+    Preferences preferences = Preferences.userRoot(); 
+    JPanel panel;
 
     
     MousePanelView(MouseService mouseService) {
@@ -41,8 +44,13 @@ public class MousePanelView {
             log.error("could not initialize mouse service: ", e);
         }
     }
+
+    public JPanel getPanel() {
+        if (panel == null) panel = initPanel();
+        return panel;
+    }
     
-      public JPanel getPanel() {
+      private JPanel initPanel() {
         JPanel mainPanel = new JPanel(new MigLayout("", "[][]"));
         JButton moveMouseBtn = new JButton(MOVE_MOUSE);
         JPanel intervalPanel = new JPanel();
@@ -119,6 +127,9 @@ public class MousePanelView {
                     JOptionPane.showMessageDialog(mainPanel, e.getMessage(), "error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
+                preferences.put("mouse.zen", Boolean.toString(zenCB.isSelected()));
+                preferences.put("mouse.interval", delayTF.getText());
+                preferences.put("mouse.endTime", endTimeTF.getText());
                 moveMouseBtn.setText(STOP_MOUSE);
                 delayTF.setEditable(false);
                 endTimeTF.setEditable(false);
@@ -127,7 +138,9 @@ public class MousePanelView {
                 stopAction.run();
             }
         });
-
+        zenCB.setSelected(Boolean.parseBoolean(preferences.get("mouse.zen", "false")));
+        delayTF.setText(preferences.get("mouse.interval", ""));
+        endTimeTF.setText(preferences.get("mouse.endTime", ""));
         return mainPanel;
     }
 }

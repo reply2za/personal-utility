@@ -86,6 +86,7 @@ public class MouseService {
     }
 
     public void stop() {
+        if (pollingFuture != null) pollingFuture.cancel(true);
         if (taskFuture != null)
             taskFuture.cancel(true);
     }

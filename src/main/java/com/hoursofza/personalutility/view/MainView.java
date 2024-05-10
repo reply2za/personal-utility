@@ -8,6 +8,7 @@ import com.formdev.flatlaf.FlatLightLaf;
 import com.hoursofza.personalutility.view.panels.MousePanelView;
 import com.hoursofza.personalutility.view.panels.WallpaperView;
 
+import lombok.extern.slf4j.Slf4j;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -17,6 +18,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 
 @Component
+@Slf4j
 public class MainView {
     JFrame mainFrame = new JFrame();
     static int PORT = 47181;
@@ -27,7 +29,7 @@ public class MainView {
         try {
             UIManager.setLookAndFeel(new FlatLightLaf());
         } catch (UnsupportedLookAndFeelException e) {
-
+            log.error(e.getMessage());
         }
         assertNoOtherInstanceRunning();
     }
@@ -38,7 +40,7 @@ public class MainView {
 			try {
 				ac = new ServerSocket(47181).accept();
 			} catch (IOException e) {
-				JOptionPane.showMessageDialog(null, "app is already running...");
+				JOptionPane.showMessageDialog(null, "app is already running, check taskbar to quit...");
 				System.exit(1);
 				return;
 			}
