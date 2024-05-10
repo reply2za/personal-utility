@@ -42,6 +42,7 @@ public class WallpaperView {
     ScheduledExecutorService SERVICE = Scheduler.getService();
     private ScheduledFuture<?> wallpaperFuture;
     private JCheckBox randomizeCB;
+    private JLabel selectedWallpaperLabel;
 
 
     WallpaperView(WallpaperManager wallpaperTask) {
@@ -55,9 +56,11 @@ public class WallpaperView {
         setIntervalWallpapersBtn.addActionListener((ae) -> startWallpaperIntervalAction(mainPanel));
         mainPanel.add(new JLabel("set wallpapers from a folder on an interval"), "shrinky,wrap,align 50%");
         addWallpaperDirectorySelection(mainPanel);
+        selectedWallpaperLabel = new JLabel();
         mainPanel.add(getIntervalTimePanel(), "wrap");
         mainPanel.add(getStartTimePanel(), "wrap");
-        mainPanel.add(setIntervalWallpapersBtn);
+        mainPanel.add(setIntervalWallpapersBtn, "wrap");
+        mainPanel.add(selectedWallpaperLabel);
         return new JScrollPane(mainPanel);
     }
 
@@ -159,7 +162,6 @@ public class WallpaperView {
             isRunningInterval = false;
             if (wallpaperFuture != null && !wallpaperFuture.isCancelled()) wallpaperFuture.cancel(false);
             wallpaperTask.reset();
-
         } else {
             if (directory == null) {
                 JOptionPane.showMessageDialog(mainPanel, "must set a wallpaper directory", "Error", JOptionPane.ERROR_MESSAGE);
@@ -259,9 +261,13 @@ public class WallpaperView {
         String localDir = this.directory;
         Runnable setWallpaper;
         if (isRandom) {
-            setWallpaper = wallpaperTask::setRandomWallpaper;
+            setWallpaper = ()-> {
+                selectedWallpaperLabel.setText("last wallpaper: " + wallpaperTask.setRandomWallpaper());
+            };
         } else {
-            setWallpaper = wallpaperTask::setNextWallpaper;
+            setWallpaper = ()-> {
+                selectedWallpaperLabel.setText("last wallpaper: " + wallpaperTask.setNextWallpaper());
+            };
         }
         wallpaperFuture = SERVICE.scheduleAtFixedRate(() -> {
             try {
