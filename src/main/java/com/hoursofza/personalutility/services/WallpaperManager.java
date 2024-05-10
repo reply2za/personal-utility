@@ -44,16 +44,19 @@ public class WallpaperManager{
     public void reset() {
         currentIndex = 0;
     }
-    public void setRandomWallpaper() {
+    public String setRandomWallpaper() {
         int item = rand.nextInt(wallpapers.size());
-        setCurrentWallpaper(directory + wallpapers.get(item));
+        String wallpaper = wallpapers.get(item);
+        setCurrentWallpaper(directory + wallpaper);
+        return wallpaper;
     }
 
-    public void setNextWallpaper() {
+    public String setNextWallpaper() {
         if (currentIndex >= wallpapers.size()) currentIndex = 0;
         String wallpaper = wallpapers.get(currentIndex);
         setCurrentWallpaper(directory + wallpaper);
         currentIndex++;
+        return wallpaper;
     }
 
     public void setDirectory(String dir) {
