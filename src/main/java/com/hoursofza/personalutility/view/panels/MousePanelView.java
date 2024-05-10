@@ -19,7 +19,6 @@ import com.hoursofza.personalutility.services.MouseService;
 import com.hoursofza.personalutility.services.Scheduler;
 import com.hoursofza.personalutility.utils.TimeUtils;
 
-import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import net.miginfocom.swing.MigLayout;
 
