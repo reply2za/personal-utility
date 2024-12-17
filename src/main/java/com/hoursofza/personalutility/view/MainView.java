@@ -2,6 +2,7 @@ package com.hoursofza.personalutility.view;
 
 import javax.swing.*;
 
+import com.hoursofza.personalutility.utils.ShellUtils;
 import org.springframework.stereotype.Component;
 
 import com.formdev.flatlaf.FlatLightLaf;
@@ -14,14 +15,19 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeListener;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
+import java.net.Socket;
 
 @Component
 @Slf4j
 public class MainView {
-    JFrame mainFrame = new JFrame();
-    static int PORT = 47181;
+    private static final JFrame mainFrame = new JFrame();
+    private static final int PORT = 47181;
 
 
     static {
@@ -34,26 +40,62 @@ public class MainView {
         assertNoOtherInstanceRunning();
     }
 
-    	public static void assertNoOtherInstanceRunning() {     
-		new Thread(() -> {
-		final AutoCloseable ac;
-			try {
-				ac = new ServerSocket(47181).accept();
-			} catch (IOException e) {
-				JOptionPane.showMessageDialog(null, "app is already running, check taskbar to quit...");
-				System.exit(1);
-				return;
-			}
-			Runtime.getRuntime().addShutdownHook(new Thread(()-> {
-				try {
-					ac.close();
-				} catch (Exception ignored) {
-					
-				}
-			})); 
-		}).start();  
+    public static void assertNoOtherInstanceRunning() {
+        new Thread(() -> {
+            ServerSocket serverSocket;
+            try {
+                serverSocket = new ServerSocket(PORT);
+                log.info("No other instance detected. Running as primary instance.");
 
-	}
+                ServerSocket finalServerSocket = serverSocket;
+                Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                    try {
+                        finalServerSocket.close();
+                        log.info("Server socket closed.");
+                    } catch (IOException e) {
+                        log.error("Error closing server socket: " + e.getMessage());
+                    }
+                }));
+
+                while (true) {
+                    try (Socket clientSocket = serverSocket.accept();
+                         BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()))) {
+                        String message = in.readLine();
+                        if ("BRING_TO_FRONT".equals(message)) {
+                            log.info("Received BRING_TO_FRONT command.");
+                            bringAppToFront();
+                        }
+                    } catch (IOException e) {
+                        log.warn("Error handling client connection: " + e.getMessage());
+                    }
+                }
+            } catch (IOException e) {
+                // If ServerSocket creation fails, assume another instance is running
+                log.info("Another instance detected. Attempting to send BRING_TO_FRONT command.");
+                JOptionPane.showMessageDialog(null, "Application is already running.");
+                sendBringToFrontCommand();
+                System.exit(0);
+            }
+        }, "SingleInstanceThread").start();
+    }
+
+    private static void bringAppToFront() {
+        mainFrame.setVisible(true);
+        mainFrame.toFront();
+    }
+
+    /**
+     * Sends a BRING_TO_FRONT command to the primary instance.
+     */
+    private static void sendBringToFrontCommand() {
+        try (Socket socket = new Socket("localhost", PORT);
+             PrintWriter out = new PrintWriter(socket.getOutputStream(), true)) {
+            out.println("BRING_TO_FRONT");
+            log.info("BRING_TO_FRONT command sent to primary instance.");
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(null, "Another instance is running, but couldn't communicate with it.");
+        }
+    }
 
     MainView(WallpaperView wallpaperView, MousePanelView mousePanelView) {
         mainFrame.setTitle("Personal Utility");
@@ -79,6 +121,7 @@ public class MainView {
             toFront();
         });
         mainFrame.setVisible(true);
+        mainFrame.toFront();
     }
 
     public void toFront() {

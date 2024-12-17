@@ -54,7 +54,6 @@ public class TimeUtils {
         if (now.compareTo(nextRun) > 0) nextRun = nextRun.plusDays(1);
 
         Duration duration = Duration.between(now, nextRun);
-        long initialDelay = duration.getSeconds() * 1000;
-        return initialDelay;
+            return duration.getSeconds() * 1000;
     }
 }
