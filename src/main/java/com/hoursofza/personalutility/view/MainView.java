@@ -2,7 +2,6 @@ package com.hoursofza.personalutility.view;
 
 import javax.swing.*;
 
-import com.hoursofza.personalutility.utils.ShellUtils;
 import org.springframework.stereotype.Component;
 
 import com.formdev.flatlaf.FlatLightLaf;
@@ -19,7 +18,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
