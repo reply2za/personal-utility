@@ -7,6 +7,7 @@ import java.awt.MenuItem;
 import java.awt.PopupMenu;
 import java.awt.Toolkit;
 import java.awt.TrayIcon;
+import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
@@ -14,7 +15,8 @@ import javax.imageio.ImageIO;
 public class SystemTray {
     public static java.awt.SystemTray tray = java.awt.SystemTray.getSystemTray();              // set up a system tray icon.
     public static TrayIcon trayIcon;
-    public static Image trayIconImage;
+    public static Image defaultTrayIconImage;
+    public static Image activeTrayIconImage;
     public static MenuItem openMainMenu;
     public static MenuItem exitItem;
     final static PopupMenu popup=new PopupMenu();
@@ -29,6 +31,12 @@ public class SystemTray {
           } else {
             windows = true;
           }
+        try {
+            defaultTrayIconImage = ImageIO.read(SystemTray.class.getClassLoader().getResource("square.png"));
+            activeTrayIconImage = ImageIO.read(SystemTray.class.getClassLoader().getResource("square_active.png"));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public SystemTray() {
@@ -44,8 +52,7 @@ public class SystemTray {
                 return;
             }
 
-            trayIconImage = ImageIO.read(SystemTray.class.getClassLoader().getResource("square.png"));
-            trayIcon = new TrayIcon(trayIconImage);
+            trayIcon = new TrayIcon(defaultTrayIconImage);
             openMainMenu = new MenuItem("Open Main Menu");
 
             // and select the exit option, this will shutdown JavaFX and remove the
@@ -68,5 +75,9 @@ public class SystemTray {
         } catch (Exception e) {
             log.error("Unable to init system tray: {}", e.getMessage());
         }
+    }
+
+    public static void setTrayIcon(boolean isActive) {
+        trayIcon.setImage(isActive ? activeTrayIconImage : defaultTrayIconImage);
     }
 }

@@ -13,6 +13,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import java.awt.*;
 
+import com.hoursofza.personalutility.view.SystemTray;
 import org.springframework.stereotype.Component;
 
 import com.hoursofza.personalutility.services.MouseService;
@@ -85,6 +86,7 @@ public class MousePanelView {
         };
         moveMouseBtn.addActionListener((ae) -> {
             if (moveMouseBtn.getText().contains(MOVE_MOUSE)) {
+                SystemTray.setTrayIcon(true);
                 if (!endTimeTF.getText().isBlank()) {
                     int[] res;
                     try {
@@ -93,7 +95,6 @@ public class MousePanelView {
                         JOptionPane.showMessageDialog(mainPanel, e.getMessage(), "error", JOptionPane.ERROR_MESSAGE);
                         return;
                     }
-                    System.out.println("ran");
                     long initialDelay = TimeUtils.timeToMS(res[0], res[1], res[2]);
                     cancelFuture = SERVICE.schedule(() -> {
                         try {
@@ -134,6 +135,7 @@ public class MousePanelView {
                 endTimeTF.setEditable(false);
                 zenCB.setEnabled(false);
             } else {
+                SystemTray.setTrayIcon(false);
                 stopAction.run();
             }
         });
