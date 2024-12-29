@@ -27,9 +27,9 @@ import net.miginfocom.swing.MigLayout;
 @Component
 @Slf4j
 public class MousePanelView {
-    private static String MOVE_MOUSE = "move mouse";
-    private static String STOP_MOUSE = "stop mouse";
-    private MouseService mouseService;
+    private static final String MOVE_MOUSE = "move mouse";
+    private static final String STOP_MOUSE = "stop mouse";
+    private final MouseService mouseService;
     ScheduledExecutorService SERVICE = Scheduler.getService();
     ScheduledFuture<?> cancelFuture;
     Preferences preferences = Preferences.userRoot(); 
@@ -67,9 +67,9 @@ public class MousePanelView {
 
         JPanel zenPanel = new JPanel();
         JLabel zenLabel = new JLabel("zen jiggle:");
-        JCheckBox zenCB = new JCheckBox();
+        JCheckBox zenCheckBox = new JCheckBox();
         zenPanel.add(zenLabel);
-        zenPanel.add(zenCB);
+        zenPanel.add(zenCheckBox);
 
 
         mainPanel.add(intervalPanel, "wrap");
@@ -81,7 +81,7 @@ public class MousePanelView {
             moveMouseBtn.setText(MOVE_MOUSE);
             delayTF.setEditable(true);
             endTimeTF.setEditable(true);
-            zenCB.setEnabled(true);
+            zenCheckBox.setEnabled(true);
             mouseService.stop();
         };
         moveMouseBtn.addActionListener((ae) -> {
@@ -120,26 +120,26 @@ public class MousePanelView {
 
                 long finalDelay = delay;
                 try {
-                    mouseService.schedule(finalDelay, zenCB.isSelected());
+                    mouseService.schedule(finalDelay, zenCheckBox.isSelected());
                 } catch (Exception e) {
                     stopAction.run();
                     e.printStackTrace();
                     JOptionPane.showMessageDialog(mainPanel, e.getMessage(), "error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
-                preferences.put("mouse.zen", Boolean.toString(zenCB.isSelected()));
+                preferences.put("mouse.zen", Boolean.toString(zenCheckBox.isSelected()));
                 preferences.put("mouse.interval", delayTF.getText());
                 preferences.put("mouse.endTime", endTimeTF.getText());
                 moveMouseBtn.setText(STOP_MOUSE);
                 delayTF.setEditable(false);
                 endTimeTF.setEditable(false);
-                zenCB.setEnabled(false);
+                zenCheckBox.setEnabled(false);
             } else {
                 SystemTray.setTrayIcon(false);
                 stopAction.run();
             }
         });
-        zenCB.setSelected(Boolean.parseBoolean(preferences.get("mouse.zen", "false")));
+        zenCheckBox.setSelected(Boolean.parseBoolean(preferences.get("mouse.zen", "false")));
         delayTF.setText(preferences.get("mouse.interval", ""));
         endTimeTF.setText(preferences.get("mouse.endTime", ""));
         return mainPanel;
