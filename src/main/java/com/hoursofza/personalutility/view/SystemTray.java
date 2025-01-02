@@ -77,6 +77,10 @@ public class SystemTray {
         }
     }
 
+    /**
+     * Sets the tray icon.
+     * @param isActive - Whether the mouse-service is active
+     */
     public static void setTrayIcon(boolean isActive) {
         trayIcon.setImage(isActive ? activeTrayIconImage : defaultTrayIconImage);
     }

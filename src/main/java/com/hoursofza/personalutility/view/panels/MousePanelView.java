@@ -86,7 +86,6 @@ public class MousePanelView {
         };
         moveMouseBtn.addActionListener((ae) -> {
             if (moveMouseBtn.getText().contains(MOVE_MOUSE)) {
-                SystemTray.setTrayIcon(true);
                 if (!endTimeTF.getText().isBlank()) {
                     int[] res;
                     try {
@@ -135,7 +134,6 @@ public class MousePanelView {
                 endTimeTF.setEditable(false);
                 zenCheckBox.setEnabled(false);
             } else {
-                SystemTray.setTrayIcon(false);
                 stopAction.run();
             }
         });

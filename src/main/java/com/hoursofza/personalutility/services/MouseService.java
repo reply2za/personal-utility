@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.swing.JOptionPane;
 
+import com.hoursofza.personalutility.view.SystemTray;
 import org.springframework.stereotype.Component;
 
 import com.hoursofza.personalutility.utils.ShellUtils;
@@ -87,8 +88,8 @@ public class MouseService {
 
     public void stop() {
         if (pollingFuture != null) pollingFuture.cancel(true);
-        if (taskFuture != null)
-            taskFuture.cancel(true);
+        if (taskFuture != null) taskFuture.cancel(true);
+        SystemTray.setTrayIcon(false);
     }
 
     private void singleRun() {
@@ -139,6 +140,7 @@ public class MouseService {
     }
 
     private void startScheduler() {
+        SystemTray.setTrayIcon(true);
         prevPosition = getCurrentPos();
         taskFuture = SERVICE.scheduleAtFixedRate(() -> {
             try {
