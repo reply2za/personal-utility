@@ -111,6 +111,7 @@ public class MainView {
         mainFrame.setSize(mainFrame.getWidth(), mainFrame.getHeight() + 50);
         mainFrame.setLocationRelativeTo(null);
         SystemTray.addAppToTray();
+        mainFrame.setIconImage(SystemTray.getDefaultTrayIconImage());
         SystemTray.openMainMenu.addActionListener((ae) -> {
             mainFrame.setVisible(true);
             toFront();
@@ -123,8 +124,6 @@ public class MainView {
     }
 
     public void toFront() {
-        int sta = mainFrame.getExtendedState() & ~JFrame.ICONIFIED & JFrame.NORMAL;
-        mainFrame.setExtendedState(sta);
         mainFrame.setAlwaysOnTop(true);
         mainFrame.toFront();
         mainFrame.requestFocus();

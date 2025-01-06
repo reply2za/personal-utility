@@ -1,5 +1,6 @@
 package com.hoursofza.personalutility.view;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.awt.Image;
@@ -8,6 +9,7 @@ import java.awt.PopupMenu;
 import java.awt.Toolkit;
 import java.awt.TrayIcon;
 import java.io.IOException;
+import java.net.URL;
 
 import javax.imageio.ImageIO;
 
@@ -15,6 +17,7 @@ import javax.imageio.ImageIO;
 public class SystemTray {
     public static java.awt.SystemTray tray = java.awt.SystemTray.getSystemTray();              // set up a system tray icon.
     public static TrayIcon trayIcon;
+    @Getter
     public static Image defaultTrayIconImage;
     public static Image activeTrayIconImage;
     public static MenuItem openMainMenu;
@@ -31,9 +34,16 @@ public class SystemTray {
           } else {
             windows = true;
           }
+        URL defaultImageURL = SystemTray.class.getClassLoader().getResource("square.png");
+        URL activeImageURL = SystemTray.class.getClassLoader().getResource("square_active.png");
+
         try {
-            defaultTrayIconImage = ImageIO.read(SystemTray.class.getClassLoader().getResource("square.png"));
-            activeTrayIconImage = ImageIO.read(SystemTray.class.getClassLoader().getResource("square_active.png"));
+            if (defaultImageURL != null) {
+                defaultTrayIconImage = ImageIO.read(defaultImageURL);
+            }
+            if (activeImageURL != null) {
+                activeTrayIconImage = ImageIO.read(activeImageURL);
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -48,11 +58,11 @@ public class SystemTray {
             Toolkit.getDefaultToolkit();
             // app requires system tray support, just exit if there is no support.
             if (!java.awt.SystemTray.isSupported()) {
-                System.out.println("No system tray support, application exiting.");
+                log.error("No system tray support, application exiting.");
                 return;
             }
 
-            trayIcon = new TrayIcon(defaultTrayIconImage);
+            trayIcon = new TrayIcon(scaleImage(defaultTrayIconImage));
             openMainMenu = new MenuItem("Open Main Menu");
 
             // and select the exit option, this will shutdown JavaFX and remove the
@@ -68,9 +78,9 @@ public class SystemTray {
             popup.addSeparator();
             popup.add(exitItem);
             trayIcon.setPopupMenu(popup);
+
             // add the application tray icon to the system tray.
             tray.add(trayIcon);
-
 
         } catch (Exception e) {
             log.error("Unable to init system tray: {}", e.getMessage());
@@ -82,6 +92,10 @@ public class SystemTray {
      * @param isActive - Whether the mouse-service is active
      */
     public static void setTrayIcon(boolean isActive) {
-        trayIcon.setImage(isActive ? activeTrayIconImage : defaultTrayIconImage);
+        trayIcon.setImage(scaleImage(isActive ? activeTrayIconImage : defaultTrayIconImage));
+    }
+
+    private static Image scaleImage(Image image) {
+        return image.getScaledInstance(16, 16, Image.SCALE_SMOOTH);
     }
 }
