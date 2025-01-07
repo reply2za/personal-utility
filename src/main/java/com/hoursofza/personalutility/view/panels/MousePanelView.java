@@ -13,7 +13,6 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import java.awt.*;
 
-import com.hoursofza.personalutility.view.MainView;
 import org.springframework.stereotype.Component;
 
 import com.hoursofza.personalutility.services.MouseService;

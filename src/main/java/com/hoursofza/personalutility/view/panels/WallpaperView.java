@@ -1,5 +1,6 @@
 package com.hoursofza.personalutility.view.panels;
 
+import java.awt.Dimension;
 import java.io.File;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
@@ -153,6 +154,7 @@ public class WallpaperView {
             }
         });
         mainPanel.add(setSingleWallpaperBtn, "wrap");
+        mainPanel.setPreferredSize(new Dimension(300, 100));
         return mainPanel;
     }
 

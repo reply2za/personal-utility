@@ -1,7 +1,10 @@
 package com.hoursofza.personalutility.view;
 
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
+import lombok.Getter;
 import org.springframework.stereotype.Component;
 
 import com.formdev.flatlaf.FlatLightLaf;
@@ -24,8 +27,10 @@ import java.net.Socket;
 @Component
 @Slf4j
 public class MainView {
+    @Getter
     private static final JFrame mainFrame = new JFrame();
     private static final int PORT = 47181;
+    private final Dimension defaultSize;
 
 
     static {
@@ -102,13 +107,37 @@ public class MainView {
         tabbedPane.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_W, metaKey),
                 "doQuitAction");
         tabbedPane.getActionMap().put("doQuitAction", new CloseAction());
-        tabbedPane.addTab("general", mousePanelView.getPanel());
-        tabbedPane.addTab("single", wallpaperView.initSingleWallpaperSection());
-        tabbedPane.addTab("interval", wallpaperView.initIntervalWallpaperSection());
+        JPanel comp1 = mousePanelView.getPanel();
+        JPanel comp2 = wallpaperView.initSingleWallpaperSection();
+        JComponent comp3 = wallpaperView.initIntervalWallpaperSection();
+        tabbedPane.addTab("general", comp1);
+        tabbedPane.addTab("single", comp2);
+        tabbedPane.addTab("interval", comp3);
+        tabbedPane.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                int index = tabbedPane.getSelectedIndex();
+                switch (index) {
+                    case 0:
+                        mainFrame.setSize(comp1.getPreferredSize().width, comp1.getPreferredSize().height + 50);
+                        break;
+                    case 1:
+                        mainFrame.setSize(comp2.getPreferredSize().width, comp2.getPreferredSize().height + 50);
+                        break;
+                    case 2:
+                        mainFrame.setSize(comp3.getPreferredSize().width, comp3.getPreferredSize().height + 75);
+                        break;
+                    default:
+                        mainFrame.setSize(defaultSize);
+                }
+            }
+        });
         mainFrame.add(tabbedPane);
         mainFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         mainFrame.pack();
-        mainFrame.setSize(mainFrame.getWidth(), mainFrame.getHeight() + 50);
+        mainFrame.setResizable(false);
+        defaultSize = new Dimension(mainFrame.getWidth(), mainFrame.getHeight());
+        mainFrame.setSize(comp1.getPreferredSize().width, comp1.getPreferredSize().height + 50);
         mainFrame.setLocationRelativeTo(null);
         SystemTray.addAppToTray();
         mainFrame.setIconImage(SystemTray.getDefaultTrayIconImage());
