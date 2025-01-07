@@ -50,7 +50,7 @@ public class MousePanelView {
     }
     
       private JPanel initPanel() {
-        JPanel mainPanel = new JPanel(new MigLayout("", "[][]"));
+        JPanel mainPanel = new JPanel(new MigLayout("", "[grow,push]0[grow,push]", "[grow,push]0[grow,push]0[grow,push]"));
         JButton moveMouseBtn = new JButton(MOVE_MOUSE);
         JPanel intervalPanel = new JPanel();
         JLabel delayLabel = new JLabel("interval (seconds): ");
@@ -71,10 +71,10 @@ public class MousePanelView {
         zenPanel.add(zenCheckBox);
 
 
-        mainPanel.add(intervalPanel, "wrap");
-        mainPanel.add(endTimePanel, "wrap");
+        mainPanel.add(intervalPanel, "growy,pushy,wrap");
+        mainPanel.add(endTimePanel, "growy,pushy,wrap");
         mainPanel.add(zenPanel, "wrap");
-        mainPanel.add(moveMouseBtn, "span 2, growx");
+        mainPanel.add(moveMouseBtn, "span 2, growx, align center, gapleft 30, gapright 30");
 
         Runnable stopAction = () -> {
             moveMouseBtn.setText(MOVE_MOUSE);
