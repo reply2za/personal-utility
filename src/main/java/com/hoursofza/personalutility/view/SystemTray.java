@@ -96,6 +96,9 @@ public class SystemTray {
     }
 
     private static Image scaleImage(Image image) {
-        return image.getScaledInstance(16, 16, Image.SCALE_SMOOTH);
+        if (windows) {
+            return image.getScaledInstance(16, 16, Image.SCALE_SMOOTH);
+        }
+        return image;
     }
 }
