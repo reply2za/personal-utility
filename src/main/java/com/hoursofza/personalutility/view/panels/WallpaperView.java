@@ -60,7 +60,7 @@ public class WallpaperView {
         selectedWallpaperLabel = new JLabel();
         mainPanel.add(getIntervalTimePanel(), "wrap");
         mainPanel.add(getStartTimePanel(), "wrap");
-        mainPanel.add(setIntervalWallpapersBtn, "wrap");
+        mainPanel.add(setIntervalWallpapersBtn, "span 2, align center");
         mainPanel.add(selectedWallpaperLabel);
         return new JScrollPane(mainPanel);
     }
@@ -132,7 +132,7 @@ public class WallpaperView {
 
     public JPanel initSingleWallpaperSection() {
         JPanel mainPanel = new JPanel(new MigLayout());
-        mainPanel.add(new JLabel("set wallpaper immediately"), "wrap");
+        mainPanel.add(new JLabel("set wallpaper now"), "span 2, pushx, align center, wrap");
         setSingleWallpaperBtn = new JButton("set wallpaper");
         setSingleWallpaperBtn.addActionListener(e -> {
             JFileChooser fileChooser = new JFileChooser();
@@ -153,7 +153,7 @@ public class WallpaperView {
                 p.put("wpDir", lastChosenDir);
             }
         });
-        mainPanel.add(setSingleWallpaperBtn, "wrap");
+        mainPanel.add(setSingleWallpaperBtn, "span 2, align center");
         mainPanel.setPreferredSize(new Dimension(300, 100));
         return mainPanel;
     }

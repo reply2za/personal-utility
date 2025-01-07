@@ -23,6 +23,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.function.Function;
 
 @Component
 @Slf4j
@@ -113,19 +114,20 @@ public class MainView {
         tabbedPane.addTab("general", comp1);
         tabbedPane.addTab("single", comp2);
         tabbedPane.addTab("interval", comp3);
+        Runnable compOneSize = () -> {mainFrame.setSize(comp1.getPreferredSize().width + 25, comp1.getPreferredSize().height + 75);};
         tabbedPane.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
                 int index = tabbedPane.getSelectedIndex();
                 switch (index) {
                     case 0:
-                        mainFrame.setSize(comp1.getPreferredSize().width, comp1.getPreferredSize().height + 50);
+                        compOneSize.run();
                         break;
                     case 1:
                         mainFrame.setSize(comp2.getPreferredSize().width, comp2.getPreferredSize().height + 50);
                         break;
                     case 2:
-                        mainFrame.setSize(comp3.getPreferredSize().width, comp3.getPreferredSize().height + 75);
+                        mainFrame.setSize(comp3.getPreferredSize().width + 25, comp3.getPreferredSize().height + 100);
                         break;
                     default:
                         mainFrame.setSize(defaultSize);
@@ -135,9 +137,9 @@ public class MainView {
         mainFrame.add(tabbedPane);
         mainFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         mainFrame.pack();
-        mainFrame.setResizable(false);
+        mainFrame.setResizable(true);
         defaultSize = new Dimension(mainFrame.getWidth(), mainFrame.getHeight());
-        mainFrame.setSize(comp1.getPreferredSize().width, comp1.getPreferredSize().height + 50);
+        compOneSize.run();
         mainFrame.setLocationRelativeTo(null);
         SystemTray.addAppToTray();
         mainFrame.setIconImage(SystemTray.getDefaultTrayIconImage());
