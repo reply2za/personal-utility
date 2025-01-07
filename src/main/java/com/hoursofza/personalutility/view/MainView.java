@@ -51,7 +51,7 @@ public class MainView {
                         finalServerSocket.close();
                         log.info("Server socket closed.");
                     } catch (IOException e) {
-                        log.error("Error closing server socket: " + e.getMessage());
+                        log.error("Error closing server socket: {}", e.getMessage());
                     }
                 }));
 
@@ -64,7 +64,7 @@ public class MainView {
                             bringAppToFront();
                         }
                     } catch (IOException e) {
-                        log.warn("Error handling client connection: " + e.getMessage());
+                        log.warn("Error handling client connection: {}", e.getMessage());
                     }
                 }
             } catch (IOException e) {
@@ -132,7 +132,7 @@ public class MainView {
 
   
 
-    private final class CloseAction implements Action {
+    private static final class CloseAction implements Action {
 
         @Override
         public Object getValue(String s) {

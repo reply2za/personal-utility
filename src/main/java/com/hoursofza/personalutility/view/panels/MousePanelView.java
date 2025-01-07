@@ -13,7 +13,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import java.awt.*;
 
-import com.hoursofza.personalutility.view.SystemTray;
+import com.hoursofza.personalutility.view.MainView;
 import org.springframework.stereotype.Component;
 
 import com.hoursofza.personalutility.services.MouseService;
@@ -75,7 +75,7 @@ public class MousePanelView {
         mainPanel.add(intervalPanel, "wrap");
         mainPanel.add(endTimePanel, "wrap");
         mainPanel.add(zenPanel, "wrap");
-        mainPanel.add(moveMouseBtn, "wrap");
+        mainPanel.add(moveMouseBtn, "span 2, growx");
 
         Runnable stopAction = () -> {
             moveMouseBtn.setText(MOVE_MOUSE);
