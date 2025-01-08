@@ -15,8 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeListener;
 import java.io.BufferedReader;
