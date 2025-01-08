@@ -15,6 +15,8 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeListener;
 import java.io.BufferedReader;
@@ -23,7 +25,8 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.function.Function;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 @Slf4j
@@ -32,6 +35,8 @@ public class MainView {
     private static final JFrame mainFrame = new JFrame();
     private static final int PORT = 47181;
     private final Dimension defaultSize;
+    private final Map<Integer,Point> componentSizes = new HashMap<>();
+    private int currentComponentIndex = 0;
 
 
     static {
@@ -118,16 +123,19 @@ public class MainView {
         tabbedPane.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
-                int index = tabbedPane.getSelectedIndex();
-                switch (index) {
+                componentSizes.put(currentComponentIndex, new Point(mainFrame.getWidth(), mainFrame.getHeight()));
+                currentComponentIndex = tabbedPane.getSelectedIndex();
+                switch (currentComponentIndex) {
                     case 0:
-                        compOneSize.run();
+                        setMainFrameSize(currentComponentIndex, compOneSize);
                         break;
                     case 1:
-                        mainFrame.setSize(comp2.getPreferredSize().width, comp2.getPreferredSize().height + 50);
+                        setMainFrameSize(currentComponentIndex, comp2.getPreferredSize().width,
+                                comp2.getPreferredSize().height + 50);
                         break;
                     case 2:
-                        mainFrame.setSize(comp3.getPreferredSize().width + 25, comp3.getPreferredSize().height + 100);
+                        setMainFrameSize(currentComponentIndex, comp3.getPreferredSize().width + 25,
+                                comp3.getPreferredSize().height + 100);
                         break;
                     default:
                         mainFrame.setSize(defaultSize);
@@ -161,7 +169,23 @@ public class MainView {
         mainFrame.setAlwaysOnTop(false);
     }
 
-  
+    private void setMainFrameSize(int currentComponentIndex, int width, int height) {
+        Point compSize = componentSizes.get(currentComponentIndex);
+        if (compSize == null) {
+            mainFrame.setSize(width, height);
+        } else {
+            mainFrame.setSize(compSize.x, compSize.y);
+        }
+    }
+
+    private void setMainFrameSize(int currentComponentIndex, Runnable runnable) {
+        Point compSize = componentSizes.get(currentComponentIndex);
+        if (compSize == null) {
+            runnable.run();
+        } else {
+            mainFrame.setSize(compSize.x, compSize.y);
+        }
+    }
 
     private static final class CloseAction implements Action {
 
